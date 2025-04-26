@@ -1,0 +1,50 @@
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white border border-gray-200 shadow-md rounded-xl overflow-hidden">
+      <thead class="bg-blue-600 text-white text-sm uppercase text-left">
+        <tr>
+          <th class="p-3">Name</th>
+          <th class="p-3">UID</th>
+          <th class="p-3">Phone</th>
+          <th class="p-3">Address</th>
+          <th class="p-3">Height</th>
+          <th class="p-3">Weight</th>
+          <th class="p-3">Picture</th>
+          <th class="p-3">Blood Group</th>
+          <th class="p-3">Emergency Contact</th>
+          <th class="p-3">Allergies</th>
+          <th class="p-3">Notes</th>
+          <th class="p-3">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let record of records" class="border-b hover:bg-gray-100 transition duration-200">
+          <td class="p-3">{{ record.name }}</td>
+          <td class="p-3">{{ record.uid }}</td>
+          <td class="p-3">{{ record.phone }}</td>
+          <td class="p-3">{{ record.address || 'N/A' }}</td>
+          <td class="p-3">{{ record.height || 'N/A' }}</td>
+          <td class="p-3">{{ record.weight || 'N/A' }}</td>
+          <td class="p-3">
+            <img *ngIf="record.picture" [src]="record.picture" alt="Picture" class="w-12 h-12 rounded object-cover" />
+          </td>
+          <td class="p-3">{{ record.bloodGroup }}</td>
+          <td class="p-3">{{ record.emergencyContact }}</td>
+          <td class="p-3">{{ record.allergies || 'None' }}</td>
+          <td class="p-3">{{ record.notes || 'No notes' }}</td>
+          <td class="p-3 flex gap-2">
+            <button (click)="editRecord(record)" 
+                    class="bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-500 transition" 
+                    >
+              Edit
+            </button>
+            <button (click)="record.id ? deleteRecord(record.id) : null" 
+                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition" 
+                    >
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

@@ -1,0 +1,131 @@
+<div class="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-md space-y-6">
+  <h2 class="text-2xl font-semibold mb-4 text-center">Patient Details Form</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- Name -->
+    <div>
+      <label class="block text-sm font-medium">Name <span class="text-red-500">*</span></label>
+      <input type="text" formControlName="name" placeholder="Name" class="mt-1 w-full rounded-md border px-3 py-2"
+        [ngClass]="{
+               'border-red-500': form.get('name')?.invalid && (form.get('name')?.touched || form.get('name')?.dirty)
+             }" />
+      <p *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-red-500 text-sm mt-1">
+        Name is required.
+      </p>
+    </div>
+
+    <!-- UID -->
+    <div>
+      <label class="block text-sm font-medium">UID (11 digits) <span class="text-red-500">*</span></label>
+      <input type="text" formControlName="uid" placeholder="UID" class="mt-1 w-full rounded-md border px-3 py-2"
+        [ngClass]="{
+              'border-red-500': form.get('uid')?.invalid && form.get('uid')?.touched && !form.get('uid')?.pending
+            }" />
+      <p *ngIf="form.get('uid')?.hasError('required') && form.get('uid')?.touched" class="text-red-500 text-sm mt-1">
+        UID is required.
+      </p>
+      <p *ngIf="form.get('uid')?.hasError('pattern') && form.get('uid')?.touched" class="text-red-500 text-sm mt-1">
+        UID must be exactly 11 digits.
+      </p>
+      <p *ngIf="form.get('uid')?.hasError('uidTaken') && form.get('uid')?.touched" class="text-amber-300 text-sm mt-1">
+        This UID is already taken.
+      </p>
+    </div>
+
+    <!-- Phone -->
+    <div>
+      <label class="block text-sm font-medium">Phone <span class="text-red-500">*</span></label>
+      <input type="text" formControlName="phone" placeholder="Phone" class="mt-1 w-full rounded-md border px-3 py-2"
+        [ngClass]="{
+               'border-red-500': form.get('phone')?.invalid && (form.get('phone')?.touched || form.get('phone')?.dirty)
+             }" />
+      <p *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched" class="text-red-500 text-sm mt-1">
+        Phone number is required.
+      </p>
+    </div>
+
+    <!-- Emergency Contact -->
+    <div>
+      <label class="block text-sm font-medium">Emergency Contact <span class="text-red-500">*</span></label>
+      <input type="text" formControlName="emergencyContact" placeholder="Emergency Contact"
+        class="mt-1 w-full rounded-md border px-3 py-2" [ngClass]="{
+               'border-red-500': form.get('emergencyContact')?.invalid && (form.get('emergencyContact')?.touched || form.get('emergencyContact')?.dirty)
+             }" />
+      <p *ngIf="form.get('emergencyContact')?.invalid && form.get('emergencyContact')?.touched"
+        class="text-red-500 text-sm mt-1">
+        Emergency contact is required.
+      </p>
+    </div>
+
+    <!-- Optional Fields -->
+    <div>
+      <label class="block text-sm font-medium">Address</label>
+      <input type="text" formControlName="address" placeholder="Address"
+        class="mt-1 w-full rounded-md border px-3 py-2" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Height</label>
+      <input type="text" formControlName="height" placeholder="Height"
+        class="mt-1 w-full rounded-md border px-3 py-2" />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium">Weight</label>
+      <input type="text" formControlName="weight" placeholder="Weight"
+        class="mt-1 w-full rounded-md border px-3 py-2" />
+    </div>
+
+    <!-- Blood Group -->
+    <div>
+      <label class="block text-sm font-medium">Blood Group <span class="text-red-500">*</span></label>
+      <select formControlName="bloodGroup" class="mt-1 w-full rounded-md border px-3 py-2" [ngClass]="{
+                'border-red-500': form.get('bloodGroup')?.invalid && (form.get('bloodGroup')?.touched || form.get('bloodGroup')?.dirty)
+              }">
+        <option value="" disabled>Select Blood Group</option>
+        <option *ngFor="let group of ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']" [value]="group">{{ group }}
+        </option>
+      </select>
+      <p *ngIf="form.get('bloodGroup')?.invalid && form.get('bloodGroup')?.touched" class="text-red-500 text-sm mt-1">
+        Blood group is required.
+      </p>
+    </div>
+
+    <!-- Picture Upload -->
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium">Upload Picture</label>
+      <input type="file" (change)="onFileChange($event)" class="mt-1 w-full rounded-md border px-3 py-2" />
+      <div *ngIf="previewUrl" class="mt-2">
+        <p class="text-sm text-gray-500 mb-1">Preview:</p>
+        <img [src]="previewUrl" alt="Preview" class="w-24 h-24 object-cover rounded-md border" />
+      </div>
+    </div>
+
+    <!-- Textareas -->
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium">Allergies / Medical History</label>
+      <textarea formControlName="allergies" placeholder="Allergies/Medical History"
+        class="mt-1 w-full rounded-md border px-3 py-2 h-24 resize-none"></textarea>
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="block text-sm font-medium">Notes / Comments</label>
+      <textarea formControlName="notes" placeholder="Notes/Comments"
+        class="mt-1 w-full rounded-md border px-3 py-2 h-24 resize-none"></textarea>
+    </div>
+
+    <!-- Submit -->
+    <div class="md:col-span-2 flex justify-end">
+      
+      <button type="submit" [disabled]="form.invalid || (editingRecordId !== null && !hasChanged)" [ngClass]="{
+    'bg-blue-600 hover:bg-blue-700': form.valid && (editingRecordId === null || hasChanged),
+    'bg-gray-400 cursor-not-allowed': form.invalid || (editingRecordId !== null && !hasChanged)
+  }" class="text-white px-6 py-2 rounded-md transition">
+        {{ editingRecordId !== null ? 'Update' : 'Submit' }}
+      </button>
+    </div>
+
+
+  </form>
+</div>
