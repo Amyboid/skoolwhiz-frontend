@@ -1,18 +1,3 @@
 {
-  "records": [
-    {
-      "id": "ad27",
-      "name": "2",
-      "uid": "12222222222",
-      "phone": "2",
-      "address": null,
-      "height": null,
-      "weight": null,
-      "picture": null,
-      "bloodGroup": "A+",
-      "emergencyContact": "2",
-      "allergies": null,
-      "notes": null
-    }
-  ]
+  "records": []
 }

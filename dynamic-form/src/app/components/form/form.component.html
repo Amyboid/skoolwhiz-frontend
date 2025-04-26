@@ -37,26 +37,38 @@
     <div>
       <label class="block text-sm font-medium">Phone <span class="text-red-500">*</span></label>
       <input type="text" formControlName="phone" placeholder="Phone" class="mt-1 w-full rounded-md border px-3 py-2"
-        [ngClass]="{
-               'border-red-500': form.get('phone')?.invalid && (form.get('phone')?.touched || form.get('phone')?.dirty)
-             }" />
-      <p *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched" class="text-red-500 text-sm mt-1">
-        Phone number is required.
+          [ngClass]="{
+              'border-red-500': form.get('phone')?.invalid && (form.get('phone')?.touched || form.get('phone')?.dirty)
+          }" />
+      
+      <p *ngIf="form.get('phone')?.hasError('required') && form.get('phone')?.touched" class="text-red-500 text-sm mt-1">
+          Phone number is required.
       </p>
-    </div>
+      
+      <p *ngIf="form.get('phone')?.hasError('invalidPhone') && form.get('phone')?.touched" class="text-amber-300 text-sm mt-1">
+          Phone number must be a valid 10-digit number.
+      </p>
+  </div>
+  
+    
 
     <!-- Emergency Contact -->
     <div>
       <label class="block text-sm font-medium">Emergency Contact <span class="text-red-500">*</span></label>
       <input type="text" formControlName="emergencyContact" placeholder="Emergency Contact"
-        class="mt-1 w-full rounded-md border px-3 py-2" [ngClass]="{
-               'border-red-500': form.get('emergencyContact')?.invalid && (form.get('emergencyContact')?.touched || form.get('emergencyContact')?.dirty)
-             }" />
-      <p *ngIf="form.get('emergencyContact')?.invalid && form.get('emergencyContact')?.touched"
-        class="text-red-500 text-sm mt-1">
-        Emergency contact is required.
+          class="mt-1 w-full rounded-md border px-3 py-2" [ngClass]="{
+              'border-red-500': form.get('emergencyContact')?.invalid && (form.get('emergencyContact')?.touched || form.get('emergencyContact')?.dirty)
+          }" />
+      
+      <p *ngIf="form.get('emergencyContact')?.hasError('required') && form.get('emergencyContact')?.touched" class="text-red-500 text-sm mt-1">
+          Emergency contact is required.
       </p>
-    </div>
+      
+      <p *ngIf="form.get('emergencyContact')?.hasError('invalidPhone') && form.get('emergencyContact')?.touched" class="text-amber-300 text-sm mt-1">
+          Emergency contact must be a valid 10-digit number.
+      </p>
+  </div>
+  
 
     <!-- Optional Fields -->
     <div>
@@ -116,8 +128,7 @@
     </div>
 
     <!-- Submit -->
-    <div class="md:col-span-2 flex justify-end">
-      
+    <div class="md:col-span-2 flex justify-end"> 
       <button type="submit" [disabled]="form.invalid || (editingRecordId !== null && !hasChanged)" [ngClass]="{
     'bg-blue-600 hover:bg-blue-700': form.valid && (editingRecordId === null || hasChanged),
     'bg-gray-400 cursor-not-allowed': form.invalid || (editingRecordId !== null && !hasChanged)

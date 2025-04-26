@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { PatientRecord } from '../../record.service';
 import { CommonModule } from '@angular/common';
 import { UniqueUidValidator } from '../../unique-uid.validator';
-
+import { Subscription } from 'rxjs';
+import { phoneValidator } from '../../ph-no.validator';
 @Component({
   selector: 'app-form',
   templateUrl: './form.component.html',
@@ -13,8 +14,7 @@ import { UniqueUidValidator } from '../../unique-uid.validator';
 export class FormComponent {
   @Input() set record(value: PatientRecord | null) {
     if (value) {
-      console.log("val",value);
-      
+
       this.editRecord(value);
     } else {
       this.resetForm();
@@ -35,13 +35,13 @@ export class FormComponent {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(50)]],
       uid: ['', [Validators.required, Validators.pattern(/^\d{11}$/)], [this.uidValidator.uniqueUidValidator()]],
-      phone: ['', [Validators.required]],
+      phone: ['', [Validators.required, phoneValidator()]],
       address: [''],
       height: [''],
       weight: [''],
       picture: [''],
       bloodGroup: ['', Validators.required],
-      emergencyContact: ['', [Validators.required]],
+      emergencyContact: ['', [Validators.required, phoneValidator()]],
       allergies: [''],
       notes: ['']
     });
@@ -68,32 +68,77 @@ export class FormComponent {
     this.resetForm();
   }
 
+  private uidValueChangesSubscription: Subscription | null = null; // Initialize to null
+  private isUpdatingUid: boolean = false; // Flag to prevent recursion
+
   editRecord(record: PatientRecord) {
     this.editingRecordId = record.id ?? null;
     this.form.patchValue(record);
     this.previewUrl = record.picture ?? null;
     this.originalValues = { ...record };
-    this.hasChanged = false;// Store original values for comparison
+    this.hasChanged = false;
+
+    // If editing, check if the UID has changed
+    if (this.editingRecordId !== null) {
+      const originalUid = record.uid; 
+
+      // Clear existing validators and set required and pattern validators
+      this.form.get('uid')?.setValidators([Validators.required, Validators.pattern(/^\d{11}$/)]);
+
+      // Unsubscribe from previous valueChanges subscription if it exists
+      if (this.uidValueChangesSubscription) {
+        this.uidValueChangesSubscription.unsubscribe();
+      }
+
+      // Get the UID control
+      const uidControl = this.form.get('uid');
+      if (uidControl) { 
+        
+        this.uidValueChangesSubscription = uidControl.valueChanges.subscribe((newUid) => {
+          if (this.isUpdatingUid) {
+            return; 
+          }
+
+          // Check if the UID has changed
+          if (newUid !== originalUid) {
+            this.isUpdatingUid = true;
+            uidControl.setAsyncValidators(this.uidValidator.uniqueUidValidator());
+          } else {
+            
+            uidControl.clearAsyncValidators();
+          }
+
+          // Update the validity of the control
+          uidControl.updateValueAndValidity({ emitEvent: false }); // Prevent triggering valueChanges again
+          this.isUpdatingUid = false; // Reset the flag
+        });
+      }
+    }
+
+    // Set the async validator for the initial load
+    this.form.get('uid')?.setAsyncValidators(this.uidValidator.uniqueUidValidator());
+    this.form.get('uid')?.updateValueAndValidity(); // Ensure the control is valid after setting validators
   }
+
 
   resetForm() {
     this.form.reset();
     this.editingRecordId = null;
     this.previewUrl = null;
-    this.originalValues = null; // Reset original values
+    this.originalValues = null;
   }
 
-  checkIfChanged() {
-    if (!this.originalValues) {
+  checkIfChanged() { 
+    if (!this.originalValues) { 
       this.hasChanged = true;
       return;
     }
 
     const currentValues = this.form.value;
-
+    
     this.hasChanged = Object.keys(this.originalValues).some(key => {
-      return this.originalValues[key] !== currentValues[key];
-    });
+      return JSON.stringify(this.originalValues[key]) !== JSON.stringify(currentValues[key]);
+    }); 
   }
 
   onFileChange(event: Event) {

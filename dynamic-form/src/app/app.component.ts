@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { FormComponent } from "./components/form/form.component";
-import { TableComponent } from "./components/table/table.component"; 
+import { TableComponent } from "./components/table/table.component";
 import { PatientRecord, RecordService } from './record.service';
 
 
 @Component({
-  selector: 'app-root', 
+  selector: 'app-root',
   templateUrl: './app.component.html',
   imports: [FormComponent, TableComponent]
 })
 export class AppComponent {
+
   title = 'frontend';
   records: PatientRecord[] = [];
   selectedRecord: PatientRecord | null = null;
@@ -25,12 +26,15 @@ export class AppComponent {
   }
 
   onAddRecord(newRecord: PatientRecord) {
+    console.log('add', newRecord);
     this.recordService.addRecord(newRecord).subscribe(() => {
       this.loadRecords(); // Reload records after adding
     });
   }
 
   onEditRecord(updatedRecord: PatientRecord) {
+    console.log('update', updatedRecord);
+
     if (updatedRecord.id) {
       this.recordService.updateRecord(updatedRecord.id, updatedRecord).subscribe(() => {
         this.loadRecords(); // Reload records after updating
@@ -46,4 +50,15 @@ export class AppComponent {
   onCloseEditModal() {
     this.selectedRecord = null; // Clear the selected record when closing the modal
   }
+
+  onDeleteRecord(record: PatientRecord) {
+
+    if (record.id) {
+      this.recordService.deleteRecord(record.id).subscribe(() => {
+        this.loadRecords();
+        this.selectedRecord = null
+      });
+    }
+  }
+
 }

@@ -1,12 +1,7 @@
-<div> 
-  <app-form 
-    (add)="onAddRecord($event)" 
-    (edit)="onEditRecord($event)" 
-    [record]="selectedRecord" 
+<div>
+  <app-form (add)="onAddRecord($event)" (edit)="onEditRecord($event)" [record]="selectedRecord"
     (close)="onCloseEditModal()">
   </app-form>
-  <app-table 
-    [records]="records" 
-    (edit)="onSelectRecord($event)">
+  <app-table (delete)="onDeleteRecord($event)" (edit)="onSelectRecord($event)" [records]="records">
   </app-table>
 </div>
