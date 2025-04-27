@@ -1,3 +1,18 @@
 {
-  "records": []
+  "records": [
+    {
+      "name": "ws",
+      "uid": "11111111111",
+      "phone": "1111111111",
+      "address": null,
+      "height": null,
+      "weight": null,
+      "picture": null,
+      "bloodGroup": "A-",
+      "emergencyContact": "1111111111",
+      "allergies": null,
+      "notes": "",
+      "id": "728e"
+    }
+  ]
 }

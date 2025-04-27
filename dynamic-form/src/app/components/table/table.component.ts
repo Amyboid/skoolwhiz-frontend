@@ -9,6 +9,22 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule]
 })
 export class TableComponent implements OnInit {
+
+  headers: string[] = [
+    'Picture',
+    'Name',
+    'UID',
+    'Phone',
+    'Address',
+    'Height',
+    'Weight',
+    'Blood Group',
+    'Emergency Contact',
+    'Allergies',
+    'Notes',
+    'Actions'
+  ];
+  
   @Input() records: PatientRecord[] = [];
   @Output() edit = new EventEmitter<PatientRecord>();
   @Output() delete = new EventEmitter<PatientRecord>();

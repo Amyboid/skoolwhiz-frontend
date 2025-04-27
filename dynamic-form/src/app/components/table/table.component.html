@@ -1,50 +1,109 @@
-<div class="overflow-x-auto">
-    <table class="min-w-full bg-white border border-gray-200 shadow-md rounded-xl overflow-hidden">
-      <thead class="bg-blue-600 text-white text-sm uppercase text-left">
-        <tr>
-          <th class="p-3">Name</th>
-          <th class="p-3">UID</th>
-          <th class="p-3">Phone</th>
-          <th class="p-3">Address</th>
-          <th class="p-3">Height</th>
-          <th class="p-3">Weight</th>
-          <th class="p-3">Picture</th>
-          <th class="p-3">Blood Group</th>
-          <th class="p-3">Emergency Contact</th>
-          <th class="p-3">Allergies</th>
-          <th class="p-3">Notes</th>
-          <th class="p-3">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let record of records" class="border-b hover:bg-gray-100 transition duration-200">
-          <td class="p-3">{{ record.name }}</td>
-          <td class="p-3">{{ record.uid }}</td>
-          <td class="p-3">{{ record.phone }}</td>
-          <td class="p-3">{{ record.address || 'N/A' }}</td>
-          <td class="p-3">{{ record.height || 'N/A' }}</td>
-          <td class="p-3">{{ record.weight || 'N/A' }}</td>
-          <td class="p-3">
-            <img *ngIf="record.picture" [src]="record.picture" alt="Picture" class="w-12 h-12 rounded object-cover" />
-          </td>
-          <td class="p-3">{{ record.bloodGroup }}</td>
-          <td class="p-3">{{ record.emergencyContact }}</td>
-          <td class="p-3">{{ record.allergies || 'None' }}</td>
-          <td class="p-3">{{ record.notes || 'No notes' }}</td>
-          <td class="p-3 flex gap-2">
-            <button (click)="editRecord(record)" 
-                    class="bg-yellow-400 text-black px-3 py-1 rounded hover:bg-yellow-500 transition" 
-                    >
-              Edit
-            </button>
-            <button (click)="deleteRecord(record)" 
-                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition" 
-                    >
-              Delete
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  
+<div class="overflow-x-auto w-full">
+  <table class="min-w-full overflow-hidden">
+    <thead class="text-sm uppercase text-left rounded-md">
+      <tr>
+        <th *ngFor="let header of headers">{{ header }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let record of records" class="hover:bg-gray-100 transition duration-200 text-sm">
+        <td>
+          <div class="picture flex justify-center h-12">
+            <div class="w-12">
+              <img *ngIf="record.picture" [src]="record.picture" alt="Picture" class="rounded-full"/>
+            </div>
+          </div>
+        </td>
+        <td>{{ record.name }}</td>
+        <td>{{ record.uid }}</td>
+        <td>{{ record.phone }}</td>
+        <td>{{ record.address || 'N/A' }}</td>
+        <td>{{ record.height || 'N/A' }}</td>
+        <td>{{ record.weight || 'N/A' }}</td>
+        <td>{{ record.bloodGroup }}</td>
+        <td>{{ record.emergencyContact }}</td>
+        <td>{{ record.allergies || 'None' }}</td>
+        <td>{{ record.notes || 'No notes' }}</td>
+        <td>
+          <div class="flex justify-center gap-2 h-10">
+
+            <button (click)="editRecord(record)" class="action-button edit-button">Edit</button>
+            <button (click)="deleteRecord(record)" class="action-button delete-button">Delete</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+<style>  
+  .picture div {
+    border-radius: 50%;
+    background: url('/camera.png') center/cover;
+
+  }
+
+  img {
+    width: 3rem;
+    height: 3rem;
+
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  th {
+    background: #cbe2ff62;
+    padding: 1rem;
+    border: 2px solid #c2c2c5;
+    color: #1d0687;
+    text-align: left;
+  }
+
+  th:hover {
+    background: #b8cfeb62;
+  }
+
+  td {
+    padding: 0.5rem;
+    border: 2px solid #c2c2c5;
+    color: #1e0c6c;
+  }
+
+  .action-button {
+    border-radius: 0.25rem; 
+    transition: background 0.3s;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    width: 72px;
+  }
+
+  .edit-button {
+    background: #adf6b1; 
+    color: black;
+    padding: 0.5rem 1rem;
+  }
+
+  .edit-button:hover {
+    background: #63ef6a;
+    /* bg-yellow-500 */
+  }
+
+  .delete-button {
+    background: #f55656;
+    /* bg-red-500 */
+    color: white;
+    /* padding: 0.5rem 1rem; */
+  }
+
+  .delete-button:hover {
+    background: #dc2626;
+    /* bg-red-600 */
+  }
+</style>

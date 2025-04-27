@@ -1,4 +1,4 @@
-<div class="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-md space-y-6">
+<div class="border w-[50%] p-6 rounded-sm">
   <h2 class="text-2xl font-semibold mb-4 text-center">Patient Details Form</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -6,7 +6,7 @@
     <!-- Name -->
     <div>
       <label class="block text-sm font-medium">Name <span class="text-red-500">*</span></label>
-      <input type="text" formControlName="name" placeholder="Name" class="mt-1 w-full rounded-md border px-3 py-2"
+      <input type="text" formControlName="name" placeholder="Name" class="form-input mt-1 w-full rounded-sm border px-3 py-2"
         [ngClass]="{
                'border-red-500': form.get('name')?.invalid && (form.get('name')?.touched || form.get('name')?.dirty)
              }" />
@@ -18,7 +18,7 @@
     <!-- UID -->
     <div>
       <label class="block text-sm font-medium">UID (11 digits) <span class="text-red-500">*</span></label>
-      <input type="text" formControlName="uid" placeholder="UID" class="mt-1 w-full rounded-md border px-3 py-2"
+      <input type="text" formControlName="uid" placeholder="UID" class="form-input mt-1 w-full rounded-sm border px-3 py-2"
         [ngClass]="{
               'border-red-500': form.get('uid')?.invalid && form.get('uid')?.touched && !form.get('uid')?.pending
             }" />
@@ -36,7 +36,7 @@
     <!-- Phone -->
     <div>
       <label class="block text-sm font-medium">Phone <span class="text-red-500">*</span></label>
-      <input type="text" formControlName="phone" placeholder="Phone" class="mt-1 w-full rounded-md border px-3 py-2"
+      <input type="text" formControlName="phone" placeholder="Phone" class="form-input mt-1 w-full rounded-sm border px-3 py-2"
           [ngClass]="{
               'border-red-500': form.get('phone')?.invalid && (form.get('phone')?.touched || form.get('phone')?.dirty)
           }" />
@@ -48,15 +48,13 @@
       <p *ngIf="form.get('phone')?.hasError('invalidPhone') && form.get('phone')?.touched" class="text-amber-300 text-sm mt-1">
           Phone number must be a valid 10-digit number.
       </p>
-  </div>
+    </div>
   
-    
-
     <!-- Emergency Contact -->
     <div>
       <label class="block text-sm font-medium">Emergency Contact <span class="text-red-500">*</span></label>
       <input type="text" formControlName="emergencyContact" placeholder="Emergency Contact"
-          class="mt-1 w-full rounded-md border px-3 py-2" [ngClass]="{
+          class="form-input mt-1 w-full rounded-sm border px-3 py-2" [ngClass]="{
               'border-red-500': form.get('emergencyContact')?.invalid && (form.get('emergencyContact')?.touched || form.get('emergencyContact')?.dirty)
           }" />
       
@@ -65,34 +63,34 @@
       </p>
       
       <p *ngIf="form.get('emergencyContact')?.hasError('invalidPhone') && form.get('emergencyContact')?.touched" class="text-amber-300 text-sm mt-1">
-          Emergency contact must be a valid 10-digit number.
+          Emergency contact
+          must be a valid 10-digit number.
       </p>
-  </div>
-  
+    </div>
 
     <!-- Optional Fields -->
     <div>
       <label class="block text-sm font-medium">Address</label>
       <input type="text" formControlName="address" placeholder="Address"
-        class="mt-1 w-full rounded-md border px-3 py-2" />
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
     </div>
 
     <div>
       <label class="block text-sm font-medium">Height</label>
       <input type="text" formControlName="height" placeholder="Height"
-        class="mt-1 w-full rounded-md border px-3 py-2" />
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
     </div>
 
     <div>
       <label class="block text-sm font-medium">Weight</label>
       <input type="text" formControlName="weight" placeholder="Weight"
-        class="mt-1 w-full rounded-md border px-3 py-2" />
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
     </div>
 
     <!-- Blood Group -->
     <div>
       <label class="block text-sm font-medium">Blood Group <span class="text-red-500">*</span></label>
-      <select formControlName="bloodGroup" class="mt-1 w-full rounded-md border px-3 py-2" [ngClass]="{
+      <select formControlName="bloodGroup" class="form-input mt-1 w-full rounded-sm border px-3 py-2" [ngClass]="{
                 'border-red-500': form.get('bloodGroup')?.invalid && (form.get('bloodGroup')?.touched || form.get('bloodGroup')?.dirty)
               }">
         <option value="" disabled>Select Blood Group</option>
@@ -107,10 +105,10 @@
     <!-- Picture Upload -->
     <div class="md:col-span-2">
       <label class="block text-sm font-medium">Upload Picture</label>
-      <input type="file" (change)="onFileChange($event)" class="mt-1 w-full rounded-md border px-3 py-2" />
+      <input type="file" (change)="onFileChange($event)" class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
       <div *ngIf="previewUrl" class="mt-2">
         <p class="text-sm text-gray-500 mb-1">Preview:</p>
-        <img [src]="previewUrl" alt="Preview" class="w-24 h-24 object-cover rounded-md border" />
+        <img [src]="previewUrl" alt="Preview" class="w-24 h-24 object-cover rounded-sm border" />
       </div>
     </div>
 
@@ -118,13 +116,13 @@
     <div class="md:col-span-2">
       <label class="block text-sm font-medium">Allergies / Medical History</label>
       <textarea formControlName="allergies" placeholder="Allergies/Medical History"
-        class="mt-1 w-full rounded-md border px-3 py-2 h-24 resize-none"></textarea>
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2 h-24 resize-none"></textarea>
     </div>
 
     <div class="md:col-span-2">
       <label class="block text-sm font-medium">Notes / Comments</label>
       <textarea formControlName="notes" placeholder="Notes/Comments"
-        class="mt-1 w-full rounded-md border px-3 py-2 h-24 resize-none"></textarea>
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2 h-24 resize-none"></textarea>
     </div>
 
     <!-- Submit -->
@@ -132,11 +130,10 @@
       <button type="submit" [disabled]="form.invalid || (editingRecordId !== null && !hasChanged)" [ngClass]="{
     'bg-blue-600 hover:bg-blue-700': form.valid && (editingRecordId === null || hasChanged),
     'bg-gray-400 cursor-not-allowed': form.invalid || (editingRecordId !== null && !hasChanged)
-  }" class="text-white px-6 py-2 rounded-md transition">
+  }" class="text-white px-6 py-2 rounded-sm transition">
         {{ editingRecordId !== null ? 'Update' : 'Submit' }}
       </button>
     </div>
-
 
   </form>
 </div>
