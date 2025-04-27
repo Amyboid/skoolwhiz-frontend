@@ -4,3 +4,25 @@
     padding: 0;
     box-sizing: border-box;
 }
+
+.success-snackbar {
+    background-color: #4CAF50 !important;
+    color: white !important;
+  }
+  
+  .error-snackbar {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+  
+  /* .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors;
+  } */
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }

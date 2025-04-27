@@ -1,19 +1,58 @@
 <div class="overflow-x-auto w-full">
+  <!-- Delete Button -->
+  @if (selectedRecords().size > 0) {
+  <div class="mb-4 flex justify-between items-center bg-red-50 p-3 rounded">
+    <span class="text-red-700">
+      {{ selectedRecords().size }} record(s) selected
+    </span>
+    <button (click)="deleteSelected()" [disabled]="isDeleting()"
+      class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition disabled:opacity-50">
+      @if (isDeleting()) {
+      <span class="animate-pulse">Deleting...</span>
+      } @else {
+      Delete Selected
+      }
+    </button>
+  </div>
+  }
+
   <table class="min-w-full overflow-hidden">
+    <!-- Table header -->
     <thead class="text-sm uppercase text-left rounded-md">
       <tr>
-        <th *ngFor="let header of headers">{{ header }}</th>
+        @for (header of headers; track header) {
+        <th>
+          @if (header === '') {
+          <input type="checkbox" [checked]="allSelected()" (change)="toggleSelectAll()" class="h-4 w-4" />
+          } @else {
+          {{ header }}
+          }
+        </th>
+        }
       </tr>
     </thead>
+
+    <!-- Table body -->
     <tbody>
-      <tr *ngFor="let record of records" class="hover:bg-gray-100 transition duration-200 text-sm">
+      @for (record of records; track record.id) {
+      <tr class="hover:bg-gray-100 transition duration-200 text-sm">
+        <!-- Checkbox -->
+        <td>
+          <input type="checkbox" [checked]="selectedRecords().has(record.id!)"
+            (change)="toggleRecordSelection(record.id!)" class="h-4 w-4" />
+        </td>
+
+        <!-- Data cells -->
         <td>
           <div class="picture flex justify-center h-12">
-            <div class="w-12">
-              <img *ngIf="record.picture" [src]="record.picture" alt="Picture" class="rounded-full"/>
+            <div class="w-12 h-full">
+              @if (record.picture) {
+              <img [src]="record.picture" alt="Picture" class="rounded-full h-full" />
+              }
             </div>
           </div>
         </td>
+
         <td>{{ record.name }}</td>
         <td>{{ record.uid }}</td>
         <td>{{ record.phone }}</td>
@@ -24,86 +63,48 @@
         <td>{{ record.emergencyContact }}</td>
         <td>{{ record.allergies || 'None' }}</td>
         <td>{{ record.notes || 'No notes' }}</td>
+
+        <!-- Actions -->
         <td>
           <div class="flex justify-center gap-2 h-10">
-
-            <button (click)="editRecord(record)" class="action-button edit-button">Edit</button>
-            <button (click)="deleteRecord(record)" class="action-button delete-button">Delete</button>
+            <button (click)="editRecord(record)" class="edit-button p-3 cursor-pointer">
+              Edit
+            </button>
           </div>
         </td>
       </tr>
+      }
     </tbody>
   </table>
 </div>
 
-
-
-<style>  
-  .picture div {
-    border-radius: 50%;
-    background: url('/camera.png') center/cover;
-
+<style>
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  img {
-    width: 3rem;
-    height: 3rem;
+  @keyframes pulse {
 
-    border-radius: 50%;
-    width: 100%;
-    height: 100%;
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
   }
-
-  table {
-    width: 100%;
+  
+th,td{
+    border: 2px solid rgb(206, 203, 203);
+    padding: 8px;
   }
-
-  th {
-    background: #cbe2ff62;
-    padding: 1rem;
-    border: 2px solid #c2c2c5;
-    color: #1d0687;
-    text-align: left;
+  .edit-button{
+    background-color: rgb(188, 237, 188);
+    border-radius: 4px;
   }
-
-  th:hover {
-    background: #b8cfeb62;
-  }
-
-  td {
-    padding: 0.5rem;
-    border: 2px solid #c2c2c5;
-    color: #1e0c6c;
-  }
-
-  .action-button {
-    border-radius: 0.25rem; 
-    transition: background 0.3s;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    width: 72px;
-  }
-
-  .edit-button {
-    background: #adf6b1; 
-    color: black;
-    padding: 0.5rem 1rem;
-  }
-
-  .edit-button:hover {
-    background: #63ef6a;
-    /* bg-yellow-500 */
-  }
-
-  .delete-button {
-    background: #f55656;
-    /* bg-red-500 */
-    color: white;
-    /* padding: 0.5rem 1rem; */
-  }
-
-  .delete-button:hover {
-    background: #dc2626;
-    /* bg-red-600 */
+  thead{ 
+    background: rgb(240, 240, 255);
+    color: rgb(3, 3, 80);
   }
 </style>

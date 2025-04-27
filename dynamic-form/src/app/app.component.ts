@@ -1,64 +1,114 @@
-import { Component } from '@angular/core';
+import { Component, signal, effect } from '@angular/core';
 import { FormComponent } from "./components/form/form.component";
 import { TableComponent } from "./components/table/table.component";
 import { PatientRecord, RecordService } from './record.service';
-
+import { CommonModule } from '@angular/common';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [FormComponent, TableComponent]
+  standalone: true,
+  imports: [CommonModule, FormComponent, TableComponent]
 })
 export class AppComponent {
+  title = 'Patient Management System';
+  records = signal<PatientRecord[]>([]);
+  selectedRecord = signal<PatientRecord | null>(null);
+  showForm = signal(false);
+  isLoading = signal(false);
 
-  title = 'frontend';
-  records: PatientRecord[] = [];
-  selectedRecord: PatientRecord | null = null;
-
-  constructor(private recordService: RecordService) {
+  constructor(
+    private recordService: RecordService,
+    private snackBar: MatSnackBar
+  ) {
+    effect(() => {
+      if (!this.selectedRecord()) this.showForm.set(false);
+    });
     this.loadRecords();
   }
 
-  loadRecords() {
-    this.recordService.getRecords().subscribe(data => {
-      this.records = data;
-    });
+  async loadRecords() {
+    this.isLoading.set(true);
+    try {
+      const records = await lastValueFrom(this.recordService.getRecords());
+      this.records.set(records);
+    } catch (error) {
+      this.showError('Failed to load records');
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
-  onAddRecord(newRecord: PatientRecord) {
-    console.log('add', newRecord);
-    this.recordService.addRecord(newRecord).subscribe(() => {
-      this.loadRecords(); // Reload records after adding
-    });
+  async onAddRecord(record: PatientRecord) {
+    try {
+      await lastValueFrom(this.recordService.addRecord(record));
+      await this.loadRecords();
+      this.showForm.set(false);
+      this.showSuccess('Record added successfully');
+    } catch (error) {
+      this.showError('Failed to add record');
+    }
   }
 
-  onEditRecord(updatedRecord: PatientRecord) {
-    console.log('update', updatedRecord);
+  async onEditRecord(record: PatientRecord) {
+    if (!record.id) return;
 
-    if (updatedRecord.id) {
-      this.recordService.updateRecord(updatedRecord.id, updatedRecord).subscribe(() => {
-        this.loadRecords(); // Reload records after updating
-        this.selectedRecord = null; // Clear the selected record
-      });
+    this.isLoading.set(true);
+    try {
+      await lastValueFrom(this.recordService.updateRecord(record.id, record));
+      await this.loadRecords();
+      this.selectedRecord.set(null);
+      this.showSuccess('Record updated successfully');
+    } catch (error) {
+      this.showError('Failed to update record');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async onDeleteRecords(ids: number[]) {
+    if (ids.length === 0) return;
+  
+    this.isLoading.set(true);
+    try {
+      const deleteOperations = ids.map(id => 
+        lastValueFrom(this.recordService.deleteRecord(id))
+      );
+      
+      await Promise.all(deleteOperations);
+      await this.loadRecords();
+      this.showSuccess(`Deleted ${ids.length} records successfully`);
+    } catch (error) {
+      console.error('Delete failed:', error);
+      this.showError('Failed to delete records');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
   onSelectRecord(record: PatientRecord) {
-    this.selectedRecord = record; // Set the selected record for editing
+    this.selectedRecord.set(record);
+    this.showForm.set(true);
   }
 
-  onCloseEditModal() {
-    this.selectedRecord = null; // Clear the selected record when closing the modal
+  toggleForm() {
+    this.showForm.update(v => !v);
+    if (!this.showForm()) this.selectedRecord.set(null);
   }
 
-  onDeleteRecord(record: PatientRecord) {
-
-    if (record.id) {
-      this.recordService.deleteRecord(record.id).subscribe(() => {
-        this.loadRecords();
-        this.selectedRecord = null
-      });
-    }
+  private showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', { 
+      duration: 3000,
+      panelClass: ['success-snackbar'] 
+    });
   }
 
+  private showError(message: string) {
+    this.snackBar.open(message, 'Close', { 
+      duration: 3000,
+      panelClass: ['error-snackbar'] 
+    });
+  }
 }

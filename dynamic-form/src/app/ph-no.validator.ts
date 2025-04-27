@@ -1,9 +1,18 @@
 import { AbstractControl, ValidatorFn } from '@angular/forms';
 
-export function phoneValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-        const phonePattern = /^\d{10}$/; // Adjust the pattern as needed
-        const valid = phonePattern.test(control.value);
-        return valid ? null : { invalidPhone: { value: control.value } };
+export const phoneValidator = (): ValidatorFn => {
+  return (control: AbstractControl) => {
+    const value = control.value;
+    if (!value) return null;
+    
+    const phonePattern = /^\d{10}$/;
+    const isValid = phonePattern.test(value);
+    
+    return isValid ? null : { 
+      invalidPhone: { 
+        value: control.value,
+        message: 'Phone number must be exactly 10 digits'
+      }
     };
-}
+  };
+};

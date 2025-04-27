@@ -1,31 +1,19 @@
-import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms';
-import { Observable, of } from 'rxjs';
-import { debounceTime, switchMap, map, catchError } from 'rxjs/operators';
+import { AbstractControl, AsyncValidatorFn } from '@angular/forms';
+import { Observable, of, timer } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { RecordService } from './record.service';
-import { Injectable } from '@angular/core';
 
+export function UniqueUidValidator(recordService: RecordService): AsyncValidatorFn {
+  return (control: AbstractControl): Observable<{ [key: string]: any } | null> => {
+    // Skip validation if empty or invalid pattern
+    if (!control.value || control.errors?.['pattern']) {
+      return of(null);
+    }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class UniqueUidValidator {
-  constructor(private recordService: RecordService) {}
-
-  uniqueUidValidator(): AsyncValidatorFn {
-    return (control: AbstractControl): Observable<ValidationErrors | null> => {
-      if (!control.value) {
-        return of(null);  // Skip validation if empty
-      }
-
-      return of(control.value).pipe(
-        debounceTime(300), // Delay before API call
-        switchMap((uid) =>
-          this.recordService.checkUid(uid).pipe(
-            map((isUnique) => (isUnique ? null : { uidTaken: true })),  // If not unique, return error
-            catchError(() => of(null))  // If API fails, return null (no error)
-          )
-        )
-      );
-    };
-  }
+    return timer(500).pipe( // Debounce 500ms
+      switchMap(() => recordService.checkUid(control.value)),
+      map(isAvailable => isAvailable ? null : { uidTaken: true }),
+      catchError(() => of(null))
+    );
+  };
 }

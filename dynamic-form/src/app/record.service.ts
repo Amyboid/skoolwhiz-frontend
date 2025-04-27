@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import {environment} from '../environments/environment'
+import { environment } from '../environments/environment';
 
-export interface PatientRecord  {
+export interface PatientRecord {
   id?: number;
   name: string;
   uid: string;
@@ -23,35 +23,40 @@ export interface PatientRecord  {
   providedIn: 'root'
 })
 export class RecordService {
-  private apiUrl = environment.apiUrl;
+  private http = inject(HttpClient);
+  private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
-
-  getRecords(): Observable<PatientRecord []> {
-    return this.http.get<PatientRecord []>(this.apiUrl);
+  getRecords(): Observable<PatientRecord[]> {
+    return this.http.get<PatientRecord[]>(this.apiUrl).pipe(
+      catchError(() => of([])))
   }
 
-  addRecord(record: PatientRecord): Observable<PatientRecord > {
+  addRecord(record: PatientRecord): Observable<PatientRecord> {
     return this.http.post<PatientRecord>(this.apiUrl, record);
+  }
+
+  updateRecord(id: number, record: PatientRecord): Observable<PatientRecord> {
+    return this.http.put<PatientRecord>(`${this.apiUrl}/${id}`, {
+      ...record,
+      id // Ensure ID is included in the body for JSON Server
+    });
+  }
+
+  deleteRecords(ids: number[]): Observable<void> {
+    const params = new HttpParams().set('id', ids.join(','));
+    return this.http.delete<void>(this.apiUrl, { params });
   }
 
   deleteRecord(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // Check if UID already exists in the database
   checkUid(uid: string): Observable<boolean> {
+    if (!uid) return of(true);
+    
     return this.http.get<PatientRecord[]>(`${this.apiUrl}?uid=${uid}`).pipe(
-      map((records) => records.length === 0),  // If length is 0, the UID is unique
-      catchError((error) => {
-        console.error('Error checking UID:', error); // Log the error
-        return of(false);  // Return false if there's an error (considered not unique)
-      })
+      map(records => records.length === 0),
+      catchError(() => of(false))
     );
   }
-
-  updateRecord(id: number, record: PatientRecord): Observable<PatientRecord> {
-    return this.http.put<PatientRecord>(`${this.apiUrl}/${id}`, record);
-  }
-  
 }

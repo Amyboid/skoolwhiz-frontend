@@ -1,7 +1,95 @@
-<div class="p-6 flex flex-col gap-4">
-  <app-form (add)="onAddRecord($event)" (edit)="onEditRecord($event)" [record]="selectedRecord"
-    (close)="onCloseEditModal()">
-  </app-form>
-  <app-table (delete)="onDeleteRecord($event)" (edit)="onSelectRecord($event)" [records]="records">
-  </app-table>
+<div class="p-6 flex flex-col gap-4 relative min-h-screen">
+  <!-- Header and Toggle Button -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">{{ title }}</h1>
+    <button (click)="toggleForm()" class="btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors">
+      {{ showForm() ? 'Close Form' : 'Add Patient' }}
+    </button>
+  </div>
+
+  <!-- Form Modal -->
+  @if (showForm()) {
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+         (click)="toggleForm()">
+      <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+           (click)="$event.stopPropagation()">
+        <app-form 
+          (add)="onAddRecord($event)"
+          (edit)="onEditRecord($event)"
+          [record]="selectedRecord()"
+          (close)="toggleForm()"
+        ></app-form>
+      </div>
+    </div>
+  }
+
+  <!-- Loading Overlay -->
+  @if (isLoading()) {
+    <div class="fixed inset-0 bg-black/30 z-50 flex items-center justify-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-4 border-t-transparent border-blue-500"></div>
+    </div>
+  }
+
+  <!-- Records Table -->
+  <app-table 
+    [records]="records()"
+    (delete)="onDeleteRecords($event)"
+    (edit)="onSelectRecord($event)"
+  ></app-table>
 </div>
+
+<style>
+
+  /* Animation for modal appearance */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.fixed {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.bg-white {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Scrollbar styling for form */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+
+/* 
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors;
+} */
+
+.fixed {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>

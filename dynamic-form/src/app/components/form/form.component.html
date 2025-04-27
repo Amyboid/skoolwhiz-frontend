@@ -1,4 +1,4 @@
-<div class="border w-[50%] p-6 rounded-sm">
+<div class="p-6 rounded-sm">
   <h2 class="text-2xl font-semibold mb-4 text-center">Patient Details Form</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -6,66 +6,61 @@
     <!-- Name -->
     <div>
       <label class="block text-sm font-medium">Name <span class="text-red-500">*</span></label>
-      <input type="text" formControlName="name" placeholder="Name" class="form-input mt-1 w-full rounded-sm border px-3 py-2"
-        [ngClass]="{
-               'border-red-500': form.get('name')?.invalid && (form.get('name')?.touched || form.get('name')?.dirty)
-             }" />
-      <p *ngIf="form.get('name')?.invalid && form.get('name')?.touched" class="text-red-500 text-sm mt-1">
-        Name is required.
-      </p>
+      <input type="text" formControlName="name" placeholder="Name"
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2"
+        [class.border-red-500]="form.controls.name.invalid && (form.controls.name.touched || form.controls.name.dirty)" />
+
+      @if (form.controls.name.invalid && form.controls.name.touched) {
+      <p class="text-red-500 text-sm mt-1">Name is required.</p>
+      }
     </div>
 
     <!-- UID -->
     <div>
       <label class="block text-sm font-medium">UID (11 digits) <span class="text-red-500">*</span></label>
-      <input type="text" formControlName="uid" placeholder="UID" class="form-input mt-1 w-full rounded-sm border px-3 py-2"
-        [ngClass]="{
-              'border-red-500': form.get('uid')?.invalid && form.get('uid')?.touched && !form.get('uid')?.pending
-            }" />
-      <p *ngIf="form.get('uid')?.hasError('required') && form.get('uid')?.touched" class="text-red-500 text-sm mt-1">
-        UID is required.
-      </p>
-      <p *ngIf="form.get('uid')?.hasError('pattern') && form.get('uid')?.touched" class="text-red-500 text-sm mt-1">
-        UID must be exactly 11 digits.
-      </p>
-      <p *ngIf="form.get('uid')?.hasError('uidTaken') && form.get('uid')?.touched" class="text-amber-300 text-sm mt-1">
-        This UID is already taken.
-      </p>
+      <input type="text" formControlName="uid" placeholder="UID"
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2"
+        [class.border-red-500]="form.controls.uid.invalid && form.controls.uid.touched && !form.controls.uid.pending" />
+
+      @if (form.controls.uid.hasError('required') && form.controls.uid.touched) {
+      <p class="text-red-500 text-sm mt-1">UID is required.</p>
+      }
+      @if (form.controls.uid.hasError('pattern') && form.controls.uid.touched) {
+      <p class="text-red-500 text-sm mt-1">UID must be exactly 11 digits.</p>
+      }
+      @if (form.controls.uid.hasError('uidTaken') && form.controls.uid.touched) {
+      <p class="text-amber-300 text-sm mt-1">This UID is already taken.</p>
+      }
     </div>
 
     <!-- Phone -->
     <div>
       <label class="block text-sm font-medium">Phone <span class="text-red-500">*</span></label>
-      <input type="text" formControlName="phone" placeholder="Phone" class="form-input mt-1 w-full rounded-sm border px-3 py-2"
-          [ngClass]="{
-              'border-red-500': form.get('phone')?.invalid && (form.get('phone')?.touched || form.get('phone')?.dirty)
-          }" />
-      
-      <p *ngIf="form.get('phone')?.hasError('required') && form.get('phone')?.touched" class="text-red-500 text-sm mt-1">
-          Phone number is required.
-      </p>
-      
-      <p *ngIf="form.get('phone')?.hasError('invalidPhone') && form.get('phone')?.touched" class="text-amber-300 text-sm mt-1">
-          Phone number must be a valid 10-digit number.
-      </p>
+      <input type="text" formControlName="phone" placeholder="Phone"
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2"
+        [class.border-red-500]="form.controls.phone.invalid && (form.controls.phone.touched || form.controls.phone.dirty)" />
+
+      @if (form.controls.phone.hasError('required') && form.controls.phone.touched) {
+      <p class="text-red-500 text-sm mt-1">Phone number is required.</p>
+      }
+      @if (form.controls.phone.hasError('invalidPhone') && form.controls.phone.touched) {
+      <p class="text-amber-300 text-sm mt-1">Phone number must be a valid 10-digit number.</p>
+      }
     </div>
-  
+
     <!-- Emergency Contact -->
     <div>
       <label class="block text-sm font-medium">Emergency Contact <span class="text-red-500">*</span></label>
       <input type="text" formControlName="emergencyContact" placeholder="Emergency Contact"
-          class="form-input mt-1 w-full rounded-sm border px-3 py-2" [ngClass]="{
-              'border-red-500': form.get('emergencyContact')?.invalid && (form.get('emergencyContact')?.touched || form.get('emergencyContact')?.dirty)
-          }" />
-      
-      <p *ngIf="form.get('emergencyContact')?.hasError('required') && form.get('emergencyContact')?.touched" class="text-red-500 text-sm mt-1">
-          Emergency contact is required.
-      </p>
-      
-      <p *ngIf="form.get('emergencyContact')?.hasError('invalidPhone') && form.get('emergencyContact')?.touched" class="text-amber-300 text-sm mt-1">
-          Emergency contact
-          must be a valid 10-digit number.
-      </p>
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2" [class.border-red-500]="form.controls.emergencyContact.invalid && 
+          (form.controls.emergencyContact.touched || form.controls.emergencyContact.dirty)" />
+
+      @if (form.controls.emergencyContact.hasError('required') && form.controls.emergencyContact.touched) {
+      <p class="text-red-500 text-sm mt-1">Emergency contact is required.</p>
+      }
+      @if (form.controls.emergencyContact.hasError('invalidPhone') && form.controls.emergencyContact.touched) {
+      <p class="text-amber-300 text-sm mt-1">Emergency contact must be a valid 10-digit number.</p>
+      }
     </div>
 
     <!-- Optional Fields -->
@@ -75,41 +70,47 @@
         class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
     </div>
 
+    <!-- Height Input -->
     <div>
       <label class="block text-sm font-medium">Height</label>
-      <input type="text" formControlName="height" placeholder="Height"
-        class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
+      <input type="number" formControlName="height" step="0.1" min="0"
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2">
     </div>
-
+    
+    <!-- Weight Input -->
     <div>
       <label class="block text-sm font-medium">Weight</label>
-      <input type="text" formControlName="weight" placeholder="Weight"
-        class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
+      <input type="number" formControlName="weight" step="0.1" min="0"
+        class="form-input mt-1 w-full rounded-sm border px-3 py-2">
     </div>
 
     <!-- Blood Group -->
     <div>
       <label class="block text-sm font-medium">Blood Group <span class="text-red-500">*</span></label>
-      <select formControlName="bloodGroup" class="form-input mt-1 w-full rounded-sm border px-3 py-2" [ngClass]="{
-                'border-red-500': form.get('bloodGroup')?.invalid && (form.get('bloodGroup')?.touched || form.get('bloodGroup')?.dirty)
-              }">
+      <select formControlName="bloodGroup" class="form-input mt-1 w-full rounded-sm border px-3 py-2"
+        [class.border-red-500]="form.controls.bloodGroup.invalid && 
+          (form.controls.bloodGroup.touched || form.controls.bloodGroup.dirty)">
         <option value="" disabled>Select Blood Group</option>
-        <option *ngFor="let group of ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']" [value]="group">{{ group }}
-        </option>
+        @for (group of bloodGroups(); track group) {
+        <option [value]="group">{{ group }}</option>
+        }
       </select>
-      <p *ngIf="form.get('bloodGroup')?.invalid && form.get('bloodGroup')?.touched" class="text-red-500 text-sm mt-1">
-        Blood group is required.
-      </p>
+      @if (form.controls.bloodGroup.invalid && form.controls.bloodGroup.touched) {
+      <p class="text-red-500 text-sm mt-1">Blood group is required.</p>
+      }
     </div>
 
     <!-- Picture Upload -->
     <div class="md:col-span-2">
       <label class="block text-sm font-medium">Upload Picture</label>
       <input type="file" (change)="onFileChange($event)" class="form-input mt-1 w-full rounded-sm border px-3 py-2" />
-      <div *ngIf="previewUrl" class="mt-2">
+
+      @if (previewUrl()) {
+      <div class="mt-2">
         <p class="text-sm text-gray-500 mb-1">Preview:</p>
-        <img [src]="previewUrl" alt="Preview" class="w-24 h-24 object-cover rounded-sm border" />
+        <img [src]="previewUrl()" alt="Preview" class="w-24 h-24 object-cover rounded-sm border" />
       </div>
+      }
     </div>
 
     <!-- Textareas -->
@@ -126,14 +127,22 @@
     </div>
 
     <!-- Submit -->
-    <div class="md:col-span-2 flex justify-end"> 
-      <button type="submit" [disabled]="form.invalid || (editingRecordId !== null && !hasChanged)" [ngClass]="{
-    'bg-blue-600 hover:bg-blue-700': form.valid && (editingRecordId === null || hasChanged),
-    'bg-gray-400 cursor-not-allowed': form.invalid || (editingRecordId !== null && !hasChanged)
-  }" class="text-white px-6 py-2 rounded-sm transition">
-        {{ editingRecordId !== null ? 'Update' : 'Submit' }}
+    <div class="md:col-span-2 flex justify-end gap-2">
+      <button type="button" 
+              (click)="onCancel()"
+              class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-sm transition">
+        Cancel
+      </button>
+      
+      <button type="submit" 
+              [disabled]="form.invalid || (isEditing && !hasChanged())"
+              class="bg-gray-400 text-white px-6 py-2 rounded-sm transition"
+              [class.bg-blue-600]="form.valid && (!isEditing || hasChanged())"
+              [class.bg-gray-400]="form.invalid || (isEditing && !hasChanged())"
+              [class.cursor-not-allowed]="form.invalid || (isEditing && !hasChanged())"  
+              >
+        {{ isEditing ? 'Update' : 'Submit' }}
       </button>
     </div>
-
   </form>
 </div>

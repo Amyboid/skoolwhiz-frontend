@@ -1,160 +1,188 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PatientRecord } from '../../record.service';
+import { Component, Input, Output, EventEmitter, inject, signal, effect, DestroyRef } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PatientRecord, RecordService } from '../../record.service';
 import { CommonModule } from '@angular/common';
 import { UniqueUidValidator } from '../../unique-uid.validator';
-import { Subscription } from 'rxjs';
 import { phoneValidator } from '../../ph-no.validator';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 @Component({
   selector: 'app-form',
   templateUrl: './form.component.html',
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
+  providers: [RecordService]
 })
 export class FormComponent {
-  @Input() set record(value: PatientRecord | null) {
-    if (value) {
+  // Signals
+  private readonly destroyRef = inject(DestroyRef);
+  private recordService = inject(RecordService);
+  editingRecordId = signal<number | null>(null);
+  hasChanged = signal(false);
+  originalValues = signal<Partial<PatientRecord> | null>(null);
+  previewUrl = signal<string | null>(null);
+  bloodGroups = signal(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']);
+  // Form Control
+  private fb = inject(FormBuilder);
+  form = this.fb.nonNullable.group({
+    name: ['', [Validators.required, Validators.maxLength(50)]],
+    uid: ['', {
+      validators: [Validators.required, Validators.pattern(/^\d{11}$/)],
+      asyncValidators: [UniqueUidValidator(this.recordService)]
+    }],
+    phone: ['', [Validators.required, phoneValidator()]],
+    address: [''],
+    height: ['', [Validators.min(0)]],  // Change to string input
+    weight: ['', [Validators.min(0)]],
+    picture: [''],
+    bloodGroup: ['', Validators.required],
+    emergencyContact: ['', [Validators.required, phoneValidator()]],
+    allergies: [''],
+    notes: ['']
+  });
 
-      this.editRecord(value);
-    } else {
-      this.resetForm();
-    }
+  // Input/Output
+  @Input() set record(value: PatientRecord | null) {
+    value ? this.editRecord(value) : this.resetForm();
   }
 
   @Output() add = new EventEmitter<PatientRecord>();
   @Output() edit = new EventEmitter<PatientRecord>();
   @Output() close = new EventEmitter<void>();
 
-  form: FormGroup;
-  previewUrl: string | ArrayBuffer | null = null;
-  editingRecordId: number | null = null;
-  originalValues: any; // To store original values for comparison
-  hasChanged = false;
-
-  constructor(private fb: FormBuilder, private uidValidator: UniqueUidValidator) {
-    this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.maxLength(50)]],
-      uid: ['', [Validators.required, Validators.pattern(/^\d{11}$/)], [this.uidValidator.uniqueUidValidator()]],
-      phone: ['', [Validators.required, phoneValidator()]],
-      address: [''],
-      height: [''],
-      weight: [''],
-      picture: [''],
-      bloodGroup: ['', Validators.required],
-      emergencyContact: ['', [Validators.required, phoneValidator()]],
-      allergies: [''],
-      notes: ['']
-    });
-
-    // Subscribe to form value changes
-    this.form.valueChanges.subscribe(() => {
-      this.checkIfChanged();
-    });
+  constructor() {
+    this.setupChangeDetection();
   }
 
+  
+  // Lifecycle Methods
+  private setupChangeDetection() {
+    effect(() => {
+      const original = this.originalValues();
+      const current = this.form.value;
+
+      this.hasChanged.set(original ?
+        Object.keys(original).some(key =>
+          JSON.stringify(original[key as keyof PatientRecord]) !== JSON.stringify(current[key as keyof typeof current])
+        ) : false
+      );
+    }, { allowSignalWrites: true });
+  }
+
+  // Public Methods
   onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
 
-    const recordData = this.form.value;
-
-    if (this.editingRecordId !== null) {
-      this.edit.emit({ ...recordData, id: this.editingRecordId });
-    } else {
-      this.add.emit(recordData);
-    }
+    const recordData = this.prepareFormData();
+    this.emitFormData(recordData);
     this.resetForm();
   }
 
-  private uidValueChangesSubscription: Subscription | null = null; // Initialize to null
-  private isUpdatingUid: boolean = false; // Flag to prevent recursion
-
-  editRecord(record: PatientRecord) {
-    this.editingRecordId = record.id ?? null;
-    this.form.patchValue(record);
-    this.previewUrl = record.picture ?? null;
-    this.originalValues = { ...record };
-    this.hasChanged = false;
-
-    // If editing, check if the UID has changed
-    if (this.editingRecordId !== null) {
-      const originalUid = record.uid; 
-
-      // Clear existing validators and set required and pattern validators
-      this.form.get('uid')?.setValidators([Validators.required, Validators.pattern(/^\d{11}$/)]);
-
-      // Unsubscribe from previous valueChanges subscription if it exists
-      if (this.uidValueChangesSubscription) {
-        this.uidValueChangesSubscription.unsubscribe();
-      }
-
-      // Get the UID control
-      const uidControl = this.form.get('uid');
-      if (uidControl) { 
-        
-        this.uidValueChangesSubscription = uidControl.valueChanges.subscribe((newUid) => {
-          if (this.isUpdatingUid) {
-            return; 
-          }
-
-          // Check if the UID has changed
-          if (newUid !== originalUid) {
-            this.isUpdatingUid = true;
-            uidControl.setAsyncValidators(this.uidValidator.uniqueUidValidator());
-          } else {
-            
-            uidControl.clearAsyncValidators();
-          }
-
-          // Update the validity of the control
-          uidControl.updateValueAndValidity({ emitEvent: false }); // Prevent triggering valueChanges again
-          this.isUpdatingUid = false; // Reset the flag
-        });
-      }
-    }
-
-    // Set the async validator for the initial load
-    this.form.get('uid')?.setAsyncValidators(this.uidValidator.uniqueUidValidator());
-    this.form.get('uid')?.updateValueAndValidity(); // Ensure the control is valid after setting validators
+  onCancel() {
+    this.resetForm();
+    this.close.emit();
   }
 
+  editRecord(record: PatientRecord) {
+    this.setEditingState(record);
+    this.setupUidValidation(record.uid);
+  }
 
   resetForm() {
     this.form.reset();
-    this.editingRecordId = null;
-    this.previewUrl = null;
-    this.originalValues = null;
-  }
-
-  checkIfChanged() { 
-    if (!this.originalValues) { 
-      this.hasChanged = true;
-      return;
-    }
-
-    const currentValues = this.form.value;
-    
-    this.hasChanged = Object.keys(this.originalValues).some(key => {
-      return JSON.stringify(this.originalValues[key]) !== JSON.stringify(currentValues[key]);
-    }); 
+    this.editingRecordId.set(null);
+    this.previewUrl.set(null);
+    this.originalValues.set(null);
   }
 
   onFileChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file && (file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg')) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        this.previewUrl = reader.result;
-        this.form.patchValue({ picture: reader.result });
-      };
-      reader.readAsDataURL(file);
-    } else {
-      this.previewUrl = null;
-      this.form.patchValue({ picture: '' });
-      console.error('Only JPG, JPEG, and PNG formats are supported.');
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+      this.handleInvalidFile();
+      return;
     }
+
+    this.readAndPreviewFile(file);
+  }
+
+  // Private Methods
+  private prepareFormData(): PatientRecord {
+    const rawValue = this.form.getRawValue();
+    return {
+      ...rawValue,
+      height: rawValue.height ? Number(rawValue.height) : undefined,
+      weight: rawValue.weight ? Number(rawValue.weight) : undefined,
+      address: rawValue.address?.trim() || undefined,
+      allergies: rawValue.allergies?.trim() || undefined,
+      notes: rawValue.notes?.trim() || undefined,
+      picture: rawValue.picture?.trim() || undefined
+    };
+  }
+
+  private emitFormData(data: PatientRecord) {
+    const id = this.editingRecordId();
+    if (id) {
+      this.edit.emit({ ...data, id });
+    } else {
+      this.add.emit(data);
+    }
+  }
+
+  private setEditingState(record: PatientRecord) {
+    this.editingRecordId.set(record.id ?? null);
+    this.form.patchValue({
+      ...record,
+      height: record.height?.toString() ?? '',  // Convert number to string
+      weight: record.weight?.toString() ?? ''   // Convert number to string
+    });
+    this.previewUrl.set(record.picture ?? null);
+    this.originalValues.set({ ...record });
+  }
+
+
+  private setupUidValidation(originalUid: string) {
+    const uidControl = this.form.controls.uid;
+    
+    uidControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(newUid => {
+      if (newUid !== originalUid) {
+        // Clear previous errors
+        if (uidControl.hasError('uidTaken')) {
+          uidControl.setErrors(null);
+        }
+        // Add fresh validation
+        uidControl.setAsyncValidators([UniqueUidValidator(this.recordService)]);
+      } else {
+        uidControl.clearAsyncValidators();
+      }
+      uidControl.updateValueAndValidity({ emitEvent: false });
+    });
+  }
+
+
+  private handleInvalidFile() {
+    this.previewUrl.set(null);
+    this.form.controls.picture.setValue('');
+    console.error('Unsupported file format. Please use JPG, JPEG, or PNG.');
+  }
+
+  private readAndPreviewFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.previewUrl.set(reader.result as string);
+      this.form.controls.picture.setValue(reader.result?.toString() ?? '');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Template helper
+  get isEditing(): boolean {
+    return this.editingRecordId() !== null;
   }
 }
